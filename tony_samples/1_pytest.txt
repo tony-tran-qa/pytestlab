@@ -1,0 +1,64 @@
+pytest
+pytest -m
+	Should run only the tests tagged @pytest.mark.smoke — a subset of the full suite. This is the Ford interview talking point: "We tag critical-path tests as smoke and gate them in CI."
+pytest --html=reports\report.html --self-contained-html
+	Then open: C:\testsuites\PytestLab\reports\report.html in your browser. This is what you'd show a Ford interviewer or attach to a Jenkins pipeline.
+Reading the Output — What Each Status Means
+	Status	Count	What it means
+	PASSED	61	Test ran, assertion succeeded
+	SKIPPED	1	test_live_api_connection — @pytest.mark.skip — intentionally bypassed, not a failure
+	XFAIL	1	test_known_failing_edge_case — expected to fail, did fail — correct behaviour
+	FAILED	0	Nothing broken
+XFAIL is important to understand for Ford: It means "I know this is broken — FORD-0001 — I'm tracking it, not ignoring it." 
+If an xfail test suddenly passes, pytest flags it as XPASS — which is also noteworthy (bug got fixed unexpectedly).
+
+Notice what pytest auto-discovered
+	You had files beyond what I wrote — test_03_fixtures_advanced.py, test_04_mocking.py, test_05_api.py, vehicle_utils.py — all picked up automatically. That's pytest's convention-based discovery: any file matching test_*.py in testpaths = tests gets collected with zero config. No test registry, no imports needed.
+	test_05_api.py is hitting a live external API (JSONPlaceholder) and all 13 tests passed — including a response time assertion under 2 seconds. That's a real integration test running against the internet.
+
+xx
+pytest -m smoke -v
+pytest --cov=tests --cov-report=term-missing
+	====================================================================================================== tests coverage ====================================================================================================== 
+	_____________________________________________________________________________________ coverage: platform win32, python 3.14.3-final-0 ______________________________________________________________________________________ 
+
+	Name                                 Stmts   Miss  Cover   Missing
+	------------------------------------------------------------------
+	tests\__init__.py                        0      0   100%
+	tests\conftest.py                       15      0   100%
+	tests\test_01_basics.py                 18      1    94%   32
+	tests\test_02_parametrize.py            18      0   100%
+	tests\test_03_fixtures_advanced.py      56      0   100%
+	tests\test_03_mocking.py                24      0   100%
+	tests\test_04_coverage_demo.py          23      1    96%   18
+	tests\test_04_mocking.py                51      3    94%   35, 77, 111
+	tests\test_05_api.py                    58      0   100%
+	------------------------------------------------------------------
+	TOTAL                                  263      5    98%
+	========================================================================================= 61 passed, 1 skipped, 1 xfailed in 1.31s ====
+pytest --html=reports\report.html --self-contained-html
+start reports\report.html
+	>> file:///C:/TNY/A01_Resume/A_Cmpny/FORD/report.html?sort=result
+		Paste Step 4's output — the coverage table is the most instructive one. You'll see the intentionally untested unknown branch in test_04_coverage_demo.py show up as a missed line.
+		
+GitHub setup:
+python -m pytest -m "not api" --tb=short -q 
+	======================================================================================= test session starts =========================================================================================
+	platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0
+	rootdir: C:\testsuites\PytestLab
+	configfile: pytest.ini
+	testpaths: tests
+	plugins: cov-7.1.0, html-4.2.0, metadata-3.1.1, mock-3.15.1
+	collected 96 items / 16 deselected / 80 selected
+
+	tests\test_01_basics.py ....sx                                                                                                                                                                  [  7%]
+	tests\test_02_parametrize.py .............                                                                                                                                                      [ 23%]
+	tests\test_03_fixtures_advanced.py ..........                                                                                                                                                   [ 36%]
+	tests\test_03_mocking.py ...                                                                                                                                                                    [ 40%]
+	tests\test_04_coverage_demo.py .....                                                                                                                                                            [ 46%]
+	tests\test_04_mocking.py ..........                                                                                                                                                             [ 58%]
+	tests\test_06_coverage_ci.py .................................                                                                                                                                  [100%]
+
+	====================================================================== 78 passed, 1 skipped, 16 deselected, 1 xfailed in 0.14s =======================================================================
+
+
