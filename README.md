@@ -1,5 +1,7 @@
 # PytestLab
 
+![Pytest CI](https://github.com/tony-tran-qa/pytestlab/actions/workflows/pytest.yml/badge.svg)
+
 A structured Pytest skill-building project using automotive-domain business logic as the code under test. Built to develop and demonstrate practical test automation skills relevant to QA Engineer roles in the automotive and enterprise software sectors.
 
 ## Project Structure
